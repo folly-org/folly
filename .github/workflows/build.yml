@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Zig
-        uses: mlugg/setup-zig@v1.2.1
+        uses: mlugg/setup-zig@v2.0.5
         with:
           version: ${{ env.ZIG_VERSION }}
       - name: Install Dependecies
@@ -40,7 +40,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Zig
-        uses: mlugg/setup-zig@v1.2.1
+        uses: mlugg/setup-zig@v2.0.5
         with:
           version: ${{ env.ZIG_VERSION }}
       - name: Build
@@ -62,7 +62,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Zig
-        uses: mlugg/setup-zig@v1.2.1
+        uses: mlugg/setup-zig@v2.0.5
         with:
           version: ${{ env.ZIG_VERSION }}
       - name: Build
