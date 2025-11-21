@@ -20,6 +20,16 @@ type FetchResponse = {
     headers: { [string]: string }
 }
 
+declare class SignalConnection
+	function Disconnect(self): nil
+end
+
+export type ScriptableSignal<T... = ...any> = {
+    --Wait: (self: ScriptableSignal<T...>) -> T..., -- TODO: implement
+    Connect: (self: ScriptableSignal<T...>, callback: (T...) -> ()) -> SignalConnection,
+    --Once: (self: ScriptableSignal<T...>, callback: (T...) -> ()) -> SignalConnection, -- TODO: implement
+}
+
 declare Renderer: {
     Font: {
         load: (filepath: string) -> FontId
@@ -34,7 +44,9 @@ declare Renderer: {
     drawCircleOutline: (x: number, y: number, radius: number, color: Color) -> (),
 
     drawText: (font: FontId, text: string, x: number, y: number, size: number, color: Color) -> (),
-    measureText: (font: FontId, text: string, size: number) -> (number, number)
+    measureText: (font: FontId, text: string, size: number) -> (number, number),
+
+    endRedraw: () -> (),
 }
 
 declare Input: {
@@ -49,8 +61,6 @@ declare Input: {
 }
 
 declare App: {
-    --- returns true if redraw
-    setMainLoop: (func: () -> boolean) -> (),
     getFPS: () -> number,
     setFPS: (fps: number) -> (),
     getWindowSize: () -> (number, number),
@@ -64,6 +74,13 @@ declare File: {
 declare JSON: {
     parse: (json: string) -> any,
     stringify: (any: any) -> string
+}
+
+declare Signal: {
+    RenderStart: ScriptableSignal<number>,
+    RenderEnd: ScriptableSignal<>,
+
+    KeyPressed: ScriptableSignal<number>,
 }
 
 declare function require(target: string): any;

@@ -41,7 +41,7 @@ local cursor = {
     write = (function(self, char)
         self:touch()
         local line = lines[self.y]
-        lines[self.y] = line:sub(1, self.x-1) .. string.char(char) .. line:sub(self.x, -1)
+        lines[self.y] = line:sub(1, self.x-1) .. if typeof(char) == "number" then string.char(char) else char .. line:sub(self.x, -1)
         self.x += 1
         self:clamp_x(string.len(lines[self.y]))
     end),
@@ -58,41 +58,71 @@ local cursor = {
     end)
 }
 
-local res = fetch("http://echo.free.beeceptor.com/", {
-    method = "POST",
-    headers = {
-        ["Content-Type"] = "application/json",
-        ["Accept"] = "application/json",
-        ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    },
-    body = JSON.stringify({
-        name = "John",
-        age = 30,
-        city = "New York",
-        is_admin = true,
-    })
-})
+-- local res = fetch("http://echo.free.beeceptor.com/", {
+--     method = "POST",
+--     headers = {
+--         ["Content-Type"] = "application/json",
+--         ["Accept"] = "application/json",
+--         ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+--     },
+--     body = JSON.stringify({
+--         name = "John",
+--         age = 30,
+--         city = "New York",
+--         is_admin = true,
+--     })
+-- })
 
-for k,v in pairs(res) do
-    if k == "headers" then
-        for k2,v2 in pairs(v) do
-            print("header:", k2, v2)
-        end
-    else
-        print(k, v)
-    end
-end
+-- for k,v in pairs(res) do
+--     if k == "headers" then
+--         for k2,v2 in pairs(v) do
+--             print("header:", k2, v2)
+--         end
+--     else
+--         print(k, v)
+--     end
+-- end
 
 local last_cursor_pos_time = os.clock()
 
-App.setMainLoop(function()
-    local char = Input.Keyboard.pollChar()
-    while char ~= 0 do
-        cursor:touch()
-        cursor:write(char)
-        char = Input.Keyboard.pollChar()
+Signal.KeyPressed:Connect(function(key)
+    print("key pressed:", key)
+
+    -- TODO: add a pause before enabling rapid fire
+    if os.clock() - last_cursor_pos_time > 1/30 then
+        last_cursor_pos_time = os.clock()
+
+        if key == kc.left then
+            cursor:touch()
+            cursor:go_to(cursor.x-1, nil)
+        elseif key == kc.right then
+            cursor:touch()
+            cursor:go_to(cursor.x+1, nil)
+
+        elseif key == kc.up then
+            cursor:touch()
+            cursor:go_to(nil, cursor.y-1)
+        elseif key == kc.down then
+            cursor:touch()
+            cursor:go_to(nil, cursor.y+1)
+
+        elseif key == kc.backspace then
+            cursor:erase()
+        elseif key == kc.enter then
+            cursor:write("\n")
+        elseif key == kc.tab then
+            cursor:write(string.rep(" ", 4))
+        end
     end
 
+    local char = Input.Keyboard.pollChar()
+    if char ~= 0 then
+        cursor:touch()
+        cursor:write(char)
+    end
+end)
+
+Signal.RenderStart:Connect(function()
     if config.user.cursor.style == "BLOCK" then
         if (os.time() % 2) == 0 then
             Renderer.drawRect(10+(cursor.x*10), (cursor.y-1)*20, 10, 20, util:MakeColor(255,255,255,255))
@@ -103,33 +133,6 @@ App.setMainLoop(function()
         Renderer.drawRect((cursor.x+2)*9-3, (cursor.y-1)*20+5, 2, 20, 
             if ((os.time() % 2) == 0) or cursor:touched() then util:MakeColor(255,255,255, 255) else util:MakeColor(255,255,255, 0)
         )
-    end
-
-    -- TODO: add a pause before enabling rapid fire
-    if os.clock() - last_cursor_pos_time > 1/30 then
-        last_cursor_pos_time = os.clock()
-
-        if Input.Keyboard.isKeyDown(kc.left) then
-            cursor:touch()
-            cursor:go_to(cursor.x-1, nil)
-        elseif Input.Keyboard.isKeyDown(kc.right) then
-            cursor:touch()
-            cursor:go_to(cursor.x+1, nil)
-
-        elseif Input.Keyboard.isKeyDown(kc.up) then
-            cursor:touch()
-            cursor:go_to(nil, cursor.y-1)
-        elseif Input.Keyboard.isKeyDown(kc.down) then
-            cursor:touch()
-            cursor:go_to(nil, cursor.y+1)
-
-        elseif Input.Keyboard.isKeyDown(kc.backspace) then
-            cursor:erase()
-        elseif Input.Keyboard.isKeyDown(kc.enter) then
-            cursor:write("\n")
-        elseif Input.Keyboard.isKeyDown(kc.tab) then
-            cursor:write(string.rep(" ", 4))
-        end
     end
 
     local width, _height = App.getWindowSize()
@@ -152,5 +155,5 @@ App.setMainLoop(function()
     Renderer.drawText(font2, "FPS: "..App.getFPS(), fps_pos_x - 5, fps_size + 5, fps_size, util:MakeColor(200, 200, 200, 255))
     Renderer.drawRectOutline(fps_pos_x - 10, 5, fps_w + 10, fps_h + 5, 1, util:MakeColor(255, 0, 0, 255))
 
-    return true
+    Renderer.endRedraw()
 end)

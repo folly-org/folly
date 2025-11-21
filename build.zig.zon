@@ -3,12 +3,12 @@
 
     .version = "0.0.1",
 
-    .minimum_zig_version = "0.14.0",
+    .minimum_zig_version = "0.15.2",
 
     .dependencies = .{
         .granite = .{
-            .url = "git+https://github.com/folly-org/granite?ref=main#729bf6c7b9a8298cac6bfbd83e9054f90f25ae5b",
-            .hash = "granite-0.0.1-gGB6ZeWRAQCQ0_5paAA4rkYa5emodOcesTX3gKSI3cwv",
+            .url = "git+https://github.com/folly-org/granite?ref=main#d652bbd04ac9662165d615c917d50b6639513589",
+            .hash = "granite-0.0.1-gGB6ZSLIAQBhyk1sZIub24UbJsA-Nz7gUi50RLYx4T83",
         },
     },
     .paths = .{
